@@ -55,10 +55,10 @@ contract Farm is ERC6909, Lock {
     /*.•°:°.´+˚.*°.˚:*.´•*.+°.•°:´*.´•*.•°.•°:°.´:•˚°.*°.˚:*.´+°.•*/
 
     function transfer(address, uint256, uint256) public override pure returns (bool) {
-        revert();
+        revert("DISABLED");
     }
 
     function transferFrom(address, address, uint256, uint256) public override pure returns (bool) {
-        revert();
+        revert("DISABLED");
     }
 }
