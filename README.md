@@ -1,66 +1,33 @@
-## Foundry
+# Overload Farm
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+The initial rollout farming contract for `Overload`.
 
-Foundry consists of:
+It's a minimal wrapper for `ERC-20` tokens, where token addresses are converted into `uint256` and accounted for by `ERC-6909`.
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+The function added to the `Farm.sol` contract are `deposit` and `withdraw`, rest are tested functions from Uniswap's `ERC-6909` contract, with `transfer` and `transferFrom` disabled (users are supposed to use the deposit and withdraw functions).
 
-## Documentation
+The `Router.sol` is a periphery contract and can be updated and re-deployed, if needed. Migration to the full immutable `Overload.sol` contract will include a migration contract.
 
-https://book.getfoundry.sh/
+## Test
 
-## Usage
-
-### Build
-
-```shell
-$ forge build
+```sh
+forge test
 ```
 
-### Test
+## Contracts
 
-```shell
-$ forge test
-```
-
-### Format
-
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
+```ml
+src
+├─ interfaces
+│  ├─ IERC20.sol
+│  └─ IWETH9.sol
+├─ libraries
+│  ├─ Lock.sol
+│  ├─ Payment.sol
+│  ├─ TokenId.sol
+│  └─ TransferHelper.sol
+├─ token
+│  └─ ERC6909.sol
+├─ Farm.sol
+└─ Router.sol
 ```
