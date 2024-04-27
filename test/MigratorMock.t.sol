@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import {Test, console} from "forge-std/Test.sol";
 
-import {TokenId} from "../../src/libraries/TokenId.sol";
+import {TokenId} from "../src/libraries/TokenId.sol";
 import {Farm} from "../src/Farm.sol";
 
 import {ERC20Mock} from "./mocks/ERC20Mock.sol";
