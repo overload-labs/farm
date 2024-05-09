@@ -21,17 +21,30 @@ contract Farm is ERC6909, Lock {
     /*                          METHODS                           */
     /*.•°:°.´+˚.*°.˚:*.´•*.+°.•°:´*.´•*.•°.•°:°.´:•˚°.*°.˚:*.´+°.•*/
 
+    /// @notice Deposit ERC-20 tokens into the contract.
+    /// @dev The contract does not support rebasing tokens, although fee-on-transfer works fine as the difference
+    ///     is the amount that's accounted for, not the input argument.
+    /// @param owner The address to credit the deposit to.
+    /// @param token The ERC-20 token to deposit.
+    /// @param amount The transfer amount.
     function deposit(address owner, address token, uint256 amount) public lock returns (bool) {
         require(amount > 0, "ZERO");
 
-        _mint(owner, token.convertToId(), amount);
+        uint256 balance = IERC20(token).balanceOf(address(this));
         IERC20(token).transferFrom(msg.sender, address(this), amount);
+        uint256 deposited = IERC20(token).balanceOf(address(this)) - balance;
+        _mint(owner, token.convertToId(), deposited);
 
-        emit Deposit(msg.sender, owner, token, amount, uint32(block.timestamp));
+        emit Deposit(msg.sender, owner, token, deposited, uint32(block.timestamp));
 
         return true;
     }
 
+    /// @notice Withdraw ERC-20 tokens from the contract.
+    /// @param owner The address to withdraw from.
+    /// @param token The ERC-20 token to deposit.
+    /// @param amount The transfer amount.
+    /// @param recipient The recipient of the ERC-20 tokens.
     function withdraw(address owner, address token, uint256 amount, address recipient) public lock returns (bool) {
         if (msg.sender != owner && !isOperator[owner][msg.sender]) {
             uint256 allowed = allowance[owner][msg.sender][token.convertToId()];
