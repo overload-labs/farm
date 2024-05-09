@@ -18,6 +18,12 @@ contract Router is Payment {
     }
 
     function deposit(address token, uint256 amount) public payable returns (bool) {
+        if (token == WETH9) {
+            require(amount == msg.value, "NOT_EQUAL_VALUE");
+        } else {
+            require(msg.value == 0, "HAS_VALUE");
+        }
+
         pay(token, msg.sender, address(this), amount);
         IERC20(token).approve(farm, amount);
         return Farm(farm).deposit(msg.sender, token, amount);
