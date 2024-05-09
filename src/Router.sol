@@ -10,6 +10,9 @@ contract Router is Payment {
     address public farm;
 
     constructor(address _farm, address _weth9) {
+        require(_farm != address(0), "ZERO_0");
+        require(_weth9 != address(0), "ZERO_1");
+
         farm = _farm;
         WETH9 = _weth9;
     }
