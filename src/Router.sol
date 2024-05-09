@@ -29,7 +29,7 @@ contract Router is Payment {
         return Farm(farm).deposit(msg.sender, token, amount);
     }
 
-    function withdraw(address token, uint256 amount) public payable returns (bool) {
+    function withdraw(address token, uint256 amount) public returns (bool) {
         Farm(farm).withdraw(msg.sender, token, amount, address(this));
 
         if (token == WETH9) {
