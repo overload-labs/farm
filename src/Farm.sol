@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {IERC20} from "./interfaces/IERC20.sol";
+import {SafeERC20} from "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+
 import {Lock} from "./libraries/Lock.sol";
 import {TokenId} from "./libraries/TokenId.sol";
 import {ERC6909} from "./token/ERC6909.sol";
@@ -31,7 +33,7 @@ contract Farm is ERC6909, Lock {
         require(amount > 0, "ZERO");
 
         uint256 balance = IERC20(token).balanceOf(address(this));
-        IERC20(token).transferFrom(msg.sender, address(this), amount);
+        SafeERC20.safeTransferFrom(IERC20(token), msg.sender, address(this), amount);
         uint256 deposited = IERC20(token).balanceOf(address(this)) - balance;
         _mint(owner, token.convertToId(), deposited);
 
@@ -56,7 +58,7 @@ contract Farm is ERC6909, Lock {
         require(amount > 0, "ZERO");
 
         _burn(owner, token.convertToId(), amount);
-        IERC20(token).transfer(recipient, amount);
+        SafeERC20.safeTransfer(IERC20(token), recipient, amount);
 
         emit Withdraw(msg.sender, owner, token, amount, recipient, uint32(block.timestamp));
 
