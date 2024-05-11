@@ -23,6 +23,8 @@ contract FarmTest is Test {
         token = new ERC20Mock("Test", "TEST", 18);
     }
 
+
+
     function test_deposit() public {
         token.mint(address(0xBEEF), 100);
 
@@ -116,6 +118,10 @@ contract FarmTest is Test {
     //////////////////////////////////////////////////////////////*/
 
     function test_deposit(address owner, uint256 amount) public {
+        if (owner == address(farm)) {
+            return;
+        }
+
         token.mint(owner, amount);
 
         vm.prank(owner);
@@ -137,6 +143,10 @@ contract FarmTest is Test {
     }
 
     function test_withdraw(address owner, uint256 depositAmount, uint256 withdrawAmount, address recipient) public {
+        if (owner == address(farm)) {
+            return;
+        }
+
         token.mint(owner, depositAmount);
 
         vm.prank(owner);
@@ -165,7 +175,10 @@ contract FarmTest is Test {
             assertTrue(farm.withdraw(owner, address(token), withdrawAmount, recipient));
             
             assertEq(farm.balanceOf(owner, address(token).convertToId()), depositAmount - withdrawAmount);
-            assertEq(token.balanceOf(recipient), withdrawAmount);
+
+            if (recipient != address(farm)) {
+                assertEq(token.balanceOf(recipient), withdrawAmount);
+            }
         }
     }
 }

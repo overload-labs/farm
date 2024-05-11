@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity >=0.7.5;
 
-import "../interfaces/IERC20.sol";
-import "../interfaces/IWETH9.sol";
+import {SafeERC20} from "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 
-import "./TransferHelper.sol";
+import "../interfaces/IWETH9.sol";
 
 abstract contract Payment {
     address public WETH9;
@@ -21,13 +21,13 @@ abstract contract Payment {
         if (token == WETH9 && address(this).balance >= value) {
             // pay with WETH9
             IWETH9(WETH9).deposit{value: value}(); // wrap only what is needed to pay
-            IWETH9(WETH9).transfer(recipient, value);
+            SafeERC20.safeTransfer(IERC20(WETH9), recipient, value);
         } else if (payer == address(this)) {
             // pay with tokens already in the contract (for the exact input multihop case)
-            TransferHelper.safeTransfer(token, recipient, value);
+            SafeERC20.safeTransfer(IERC20(token), recipient, value);
         } else {
             // pull payment
-            TransferHelper.safeTransferFrom(token, payer, recipient, value);
+            SafeERC20.safeTransferFrom(IERC20(token), payer, recipient, value);
         }
     }
 

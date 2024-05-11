@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity ^0.8.0;
 
-import {IERC20} from "./interfaces/IERC20.sol";
+import {SafeERC20} from "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+
 import {IWETH9} from "./interfaces/IWETH9.sol";
 import {Payment} from "./libraries/Payment.sol";
 import {Farm} from "./Farm.sol";
@@ -25,7 +27,7 @@ contract Router is Payment {
         }
 
         pay(token, msg.sender, address(this), amount);
-        IERC20(token).approve(farm, amount);
+        SafeERC20.forceApprove(IERC20(token), farm, amount);
         return Farm(farm).deposit(msg.sender, token, amount);
     }
 
