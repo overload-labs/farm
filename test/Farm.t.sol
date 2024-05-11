@@ -7,6 +7,7 @@ import {TokenId} from "../src/libraries/TokenId.sol";
 import {Farm} from "../src/Farm.sol";
 
 import {ERC20Mock} from "./mocks/ERC20Mock.sol";
+import {ERC20Fee} from "./mocks/ERC20Fee.sol";
 
 contract FarmTest is Test {
     using TokenId for uint256;
@@ -22,8 +23,6 @@ contract FarmTest is Test {
         farm = new Farm();
         token = new ERC20Mock("Test", "TEST", 18);
     }
-
-
 
     function test_deposit() public {
         token.mint(address(0xBEEF), 100);
@@ -111,6 +110,43 @@ contract FarmTest is Test {
         vm.prank(address(0xBEEF));
         vm.expectRevert(abi.encodePacked("DISABLED"));
         farm.transferFrom(address(0xBEEF), address(0xABCD), address(token).convertToId(), 100);
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                                  FEE
+    //////////////////////////////////////////////////////////////*/
+
+    function test_deposit_fee() public {
+        vm.prank(address(0xBEEF));
+        ERC20Fee tokenFee = new ERC20Fee(1e18, 1_000);
+
+        vm.prank(address(0xBEEF));
+        tokenFee.approve(address(farm), 10_000);
+
+        vm.prank(address(0xBEEF));
+        vm.expectEmit(true, true, true, true);
+        emit Deposit(address(0xBEEF), address(0xBEEF), address(tokenFee), 9_000, uint32(block.timestamp));
+        farm.deposit(address(0xBEEF), address(tokenFee), 10_000);
+
+        assertEq(farm.balanceOf(address(0xBEEF), address(tokenFee).convertToId()), 9_000);
+    }
+
+    function test_withdraw_fee() public {
+        vm.prank(address(0xBEEF));
+        ERC20Fee tokenFee = new ERC20Fee(1e18, 1_000);
+
+        vm.prank(address(0xBEEF));
+        tokenFee.approve(address(farm), 10_000);
+        vm.prank(address(0xBEEF));
+        farm.deposit(address(0xBEEF), address(tokenFee), 10_000);
+
+        vm.prank(address(0xBEEF));
+        vm.expectEmit(true, true, true, true);
+        emit Withdraw(address(0xBEEF), address(0xBEEF), address(tokenFee), 9_000, address(0xBEEF), uint32(block.timestamp));
+        farm.withdraw(address(0xBEEF), address(tokenFee), 9_000, address(0xBEEF));
+
+        assertEq(farm.balanceOf(address(0xBEEF), address(tokenFee).convertToId()), 0);
+        assertEq(tokenFee.balanceOf(address(0xBEEF)), 1e18 - 2_000);
     }
 
     /*//////////////////////////////////////////////////////////////

@@ -26,19 +26,26 @@ contract Router is Payment {
             require(msg.value == 0, "HAS_VALUE");
         }
 
+        uint256 balance = IERC20(token).balanceOf(address(this));
         pay(token, msg.sender, address(this), amount);
-        SafeERC20.forceApprove(IERC20(token), farm, amount);
-        return Farm(farm).deposit(msg.sender, token, amount);
+        uint256 deposited = IERC20(token).balanceOf(address(this)) - balance;
+
+        SafeERC20.forceApprove(IERC20(token), farm, deposited);
+        return Farm(farm).deposit(msg.sender, token, deposited);
     }
 
     function withdraw(address token, uint256 amount) public returns (bool) {
-        Farm(farm).withdraw(msg.sender, token, amount, address(this));
-
         if (token == WETH9) {
+            Farm(farm).withdraw(msg.sender, token, amount, address(this));
+
             IWETH9(WETH9).withdraw(amount);
             safeTransferETH(msg.sender, amount);
         } else {
-            pay(token, address(this), msg.sender, amount);
+            uint256 balance = IERC20(token).balanceOf(address(this));
+            Farm(farm).withdraw(msg.sender, token, amount, address(this));
+            uint256 withdrawn = IERC20(token).balanceOf(address(this)) - balance;
+
+            pay(token, address(this), msg.sender, withdrawn);
         }
 
         return true;
